@@ -1,11 +1,102 @@
+
 <!DOCTYPE html>
-    <html lang="en">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Wesbite</title>
+        <title>51ms Website</title>
+        <style>
+            body {
+                overflow: hidden;
+                margin: 0px;
+                padding: 0px;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100vh;
+                background-color: black;
+            }
+        </style>
     </head>
     <body>
-        <iframe src="https://poki.com/" width="600" height="400"></iframe>
+        <script>
+            let d = document;
+
+            const canvas = d.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            d.body.append(canvas)
+
+            canvas.width = document.documentElement.clientWidth;
+            canvas.height = document.documentElement.clientHeight;
+            const cWidth = canvas.width;
+            const cHeight = canvas.height;
+
+            // const maxDistance = cWidth / 7;
+            const maxDistance = cWidth / 6;
+
+            class dot {
+                constructor(x, y, velx, vely) {
+                    this.x = x;
+                    this.y = y;
+                    this.velx = velx;
+                    this.vely = vely;
+                    this.alpha = 1.0;
+                }
+                update() {
+                    this.x += this.velx;
+                    this.y += this.vely;
+                    ctx.beginPath();
+                    ctx.globalAlpha = this.alpha;
+                    ctx.lineWidth = 2;
+                    ctx.arc(this.x, this.y, ctx.lineWidth, 0, 2 * Math.PI, false);
+                    ctx.fillStyle = "#c1c1c1";
+                    ctx.fill();
+                }
+            }
+
+            let dots = [];
+            function run() {
+                for (let i = 0; i < 30; i++) {
+                    dots.push(new dot(Math.random() * cWidth, Math.random() * cHeight, (Math.random() * 3) - 1.5, (Math.random() * 3) - 1.5));
+                }
+                setInterval(() => {
+                    ctx.clearRect(0, 0, cWidth, cHeight);
+                    for (i in dots) {
+                        dots[i].update();
+                        if (dots[i].x < 0) {
+                            dots[i].velx = Math.random() * 1.5;
+                        }
+                        if (dots[i].y < 0) {
+                            dots[i].vely = Math.random() * 1.5;
+                        }
+                        if (dots[i].x > cWidth) {
+                            dots[i].velx = (Math.random() * 1.5) * -1;
+                        }
+                        if (dots[i].y > cHeight) {
+                            dots[i].vely = (Math.random() * 1.5) * -1;
+                        }
+                        for (j in dots) {
+                            if (dots[i].x == dots[j].x && dots[i].y == dots[j].y) continue;
+                            if (Math.abs(dots[i].x - dots[j].x) < maxDistance && Math.abs(dots[i].y - dots[j].y) < maxDistance) {
+                                // console.log(Math.abs(Math.abs(dots[i].x - dots[j].x) - maxDistance) / maxDistance + "\npos:" + dots[i].x + "||" + dots[j].x)
+                                let alpha = Math.min(Math.abs(Math.abs(dots[i].x - dots[j].x) - maxDistance) / maxDistance, Math.abs(Math.abs(dots[i].y - dots[j].y) - maxDistance) / maxDistance);
+                                ctx.beginPath();
+                                ctx.globalAlpha = alpha;
+                                ctx.strokeStyle = "#c1c1c1"
+                                ctx.lineWidth = 1;
+                                ctx.moveTo(dots[i].x, dots[i].y);
+                                ctx.lineTo(dots[j].x, dots[j].y);
+                                dots[i].alpha = alpha; // Not sure whether to keep this \_(-.-)_/
+                                // dots[j].update();
+                                ctx.stroke();
+                                ctx.globalAlpha = 1;
+                            }
+                        }
+                    }
+                }, 1000 / 60);
+            }
+            document.body.onload = run();
+        </script>
     </body>
 </html>
